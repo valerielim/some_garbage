@@ -1,4 +1,47 @@
-# Cheat sheets for lazy people 
+# Pretty cheat sheets for my lazy ass self
+
+-------------------------------------------------------------- 
+# Common Mistakes
+
+* In NumPy, the **shape** property starts from ONE. However the **arrays** property starts from zero.  
+* If having problems converting data types, likely because NA, NaN, '' exist. Remove garbage and try again. 
+
+-------------------------------------------------------------- 
+# Workflows
+
+Calculate the total amount of alcohol drank for each country, 
+for a given year. 
+
+```py
+import numpy as np
+
+data = np.genfromtxt("world_alcohol.csv", delimiter = ",", skip_header = 1, dtype = "U75")
+
+totals = {}
+
+# keep data from relevant year only
+year = '1989'
+is_year = (data[:,0] == year)
+correct_data = data[is_year]
+
+# loop through to find total for each country
+for country in countries:    
+    criteria = (correct_data[:,2] == country)
+    country_consumption = correct_data[criteria]
+    
+    # replace '' with 0s then convert to float
+    toberemoved = (country_consumption[:,4] == '')
+    country_consumption[toberemoved, 4] = 0
+    
+    # sum it up
+    alcohol_consumed = (country_consumption[:,4]).astype(float)    
+    total_alcohol = alcohol_consumed.sum()
+    
+    # add to dictionary
+    totals[country] = total_alcohol
+
+print(totals)
+```
 
 -------------------------------------------------------------- 
 ### Working with CSV
@@ -32,8 +75,8 @@ patriots_wins = len(patriots) # length of array; num lists aka num rows
 -------------------------------------------------------------- 
 # NumPy
 
-`nd-arrays` are a core data type of NumPy. 
-A 1-dimensional array is often referred to as a **vector** while a 2-dimensional array is often referred to as a **matrix**. 
+`nd-arrays` are a core data type of NumPy. A 1-dimensional array is often 
+referred to as a **vector** while a 2-dimensional array is often referred to as a **matrix**. 
 Meanwhile, items in that array are called **elements**.
 
 ```py
@@ -42,63 +85,46 @@ matrix = np.array([[5,10,15], # fuggin list of lists yo
                   [20,25,30],
                   [35,40,45]])
 ```
+
+### Shape & Reshape
+
+```py
+x = np.array([[10,20,30],
+             [1, 2, 3]]) # (2,3)
+y = np.reshape(x, (3,2) # new dimensions here
+y = np.reshape(x, (3, -1) # infers dimensions when left as -1
+```
 ### Indexing
 
-* Row : Column 
-* Remember that it starts from ZERO!!! noob.
-```
+```py
 middle_item = matrix[1][1]
-thirty-five = matrix[2][0]
-
-third_column = matrix[:, 2] 
-first_two_rows = matrix[0:2,:] 
-first_two_columns = matrix[:,0:2] 
+allrows_third_column = matrix[:, 2] 
+first_two_rows_allcols = matrix[0:2,:] 
 ```
 
-This is different from measuring the length/ size of the object. 
-
-* For ndarrays, the **shape** property contains a `tuple` with `n` elements (it's dimensions). 
-* Unlike indexes, tuples start from ONE, not zero, because it counts items.
+### Replacing 
 
 ```py
-vector = numpy.array([1, 2, 3, 4])
-vector_shape = vector.shape() # wrong
-print(vector.shape) # correct, output is (4, ) # four items
-```
-
-### Data manipulation
-
-**Replace items in matrix**
-
-```py
-# Replace 1986 with 2014 within the first column
 toreplace = (data[:,0] == '1986') 
 data[toreplace, 0] = '2014'
+
+remove_NA = data[:,1] == 'NA' # select
+data[remove_NA, 1] = '0' # replace
 ```
 
-**Change the data type**
-
-* May will return an error if there are empty strings, NA, or NaN
-* Best to select and remove all of them first 
+### Changing data types
 
 ```py
-data = np.genfromtext( ... ) 
-removeNA = data[:,:] == ''
-data[removeNA, :] = '0' # or whatever type you want
 data = data.astype(float) 
 ```
 
-**Math functions**
+### Math functions
 
-For vectors, leave tail args blank. 
 For matrix, need to specify axis: `0` for `columns` and `1` for rows (alphabetical order!)
 
 * `vector.mean()`
 * `matrix.sum(axis = 0)`
 * `matrix.max(axis = 1)`
-
-
-
 
 ### Standard data types
 
@@ -110,18 +136,6 @@ Check the type of a variable using `data.dtype`.
 | int  | integer | int16, int32, or int64
 | float | floating point values | float16, float32, or float64
 | string | String values, text | string, unicode |
-
-
-## Data
-
-| Year | Continent | Country | stuff | unit |
-| ---- | ---- | ---- | ---- | ---- | 
-| 1986 | Western Pacific | Viet Nam |	Wine | 0
-| 1986 | Americas	| Uruguay	| Other	| 0.5
-| 1985 | Africa |	Cote d'Ivoire	| Wine | 1.62
-
-This is a 3x5 matrix; 15 elements, 2-dimensional, 3 rows, 5 columns.
-
 
 
 
