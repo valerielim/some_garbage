@@ -1,9 +1,11 @@
-/* SQL cheatsheets */
--- MySQL
--- Standard
--- BigQuery
+/////* SQL cheatsheets */////
+-- MySQL		Date-time functions		Where conditions: Logic, Math		Partition over
+-- Standard		Count, Aggregations		Regexp & String manipulation		Case statement
+-- BigQuery		Math functions			Joins & Unions
+-- Database management: Create, Insert, Load, Update, Delete, Alter. 
+-- Optimising speed, costs of query
 
-/* COMMAND ORDER */
+/////* COMMAND ORDER */////
 
   SELECT
   FROM
@@ -13,7 +15,7 @@
   HAVING 
   LIMIT   --SQL ONLY
 
-/* DATE-TIME FUNCTIONS */
+/////* DATE-TIME FUNCTIONS */////
 
   SECOND      HOUR         WEEK          MONTH        YEAR
   MINUTE      DAY          DAYOFWEEK     QUARTER      TIMESTAMPDIFF
@@ -31,7 +33,7 @@
 -- TIMESTAMPDIFF(hour/minute/second, var1, var2) which calculates the difference between 2 variables in the specified format.
 -- DAYOFWEEK(datevar), where the day of the week will be returned as an integer from 1 - 7 where 1 = Sunday, 2 = Monday, etc.
 
-/* COUNTING & AGGREGATION */ 
+/////* COUNTING & AGGREGATION *///// 
 
 -- GROUP BY (ALL)
 -- COUNT DISTINCT (SQL, MYSQL)
@@ -53,7 +55,12 @@
   FROM database
   GROUP BY classes, age
 
-/* WHERE CONDITIONS */
+/////* MATH FUNCTIONS */////
+
+-- MIN()    AVG()     FLOOR()     STDDEV_POP() population stdev    VAR_POP() population variance
+-- MAX()    SUM()     CEILING()   STDDEV_SAMP() sample stdev       VAR_SAMP() sample variance
+		    
+/////* WHERE CONDITIONS */////
 
 # LOGIC: Use Brackets to separate logical operators. 
 # -- AND    OR      NOT 
@@ -79,7 +86,7 @@
 # -- WILDCARD % (any number of characters)
 # -- WILDCARE _ (exact 1 wild character)
 
-/* REGEX, STRING MANIPULATION */
+/////* REGEX, STRING MANIPULATION */////
 
 -- REGEXP()
 -- REGEXP_LIKE()
@@ -114,12 +121,7 @@ WHERE REGEXP_LIKE( target, 'pattern')
   SELECT MID("Hello World! It's me!", 1, 5) AS HELLO;
   SELECT MID("Hello World! It's me!", -3, 2) AS ME;
   
-/* MORE MATH FUNCTIONS */
-
--- MIN()    AVG()     FLOOR()     STDDEV_POP() population stdev    VAR_POP() population variance
--- MAX()    SUM()     CEILING()   STDDEV_SAMP() sample stdev       VAR_SAMP() sample variance
-
-/* JOINS */
+/////* JOINS & UNION */////
 
 -- LEFT JOIN ... ON ... 
 -- RIGHT JOIN ... ON ... 
@@ -147,8 +149,8 @@ WHERE REGEXP_LIKE( target, 'pattern')
   WHERE Country='Germany'
   ORDER BY City;
   
-/* PARTITION OVER */
-/* Use partition over to create new column 
+/////* PARTITION OVER */////
+-- Use partition over to create new columns. Make search faster.
 
   SELECT 
   store,
@@ -158,7 +160,7 @@ WHERE REGEXP_LIKE( target, 'pattern')
 	ROW_NUMBER() OVER (PARTITION BY store ORDER BY sum_monthly_revenue DESC ) AS Row_avg_rev
 	FROM database 
 
-/* CASE */
+/////* CASE */////
 
 -- CASE (SINGULAR) TO REPLACE IF-ELSE STATEMENTS:
 
@@ -181,7 +183,9 @@ WHERE REGEXP_LIKE( target, 'pattern')
   FROM store_msa
   GROUP BY education_levels
 
-/* CREATE NEW TABLES */
+# ---------------------------------------------------------------------------------------------------------- # 
+
+/////* CREATE NEW TABLES */////
 
   CREATE TABLE Persons (
       PersonID int,
@@ -195,7 +199,7 @@ WHERE REGEXP_LIKE( target, 'pattern')
       FROM existing_table_name
       WHERE ....;
 
-/* ADDING & EDITING NEW DATA */
+/////* ADDING & EDITING NEW DATA */////
 
 -- INSERT ROWS FROM OTHER TABLE:
 
@@ -239,14 +243,13 @@ WHERE REGEXP_LIKE( target, 'pattern')
   ALTER TABLE table_name
   MODIFY* COLUMN column_name datatype; -- *specific to MySQL only
 
-/* Notes on optimising performance & costs */
+/////* Notes on optimising performance & costs */////
   
   -- On BQ, where possible, use EXACT_COUNT_DISTINCT rather than COUNT(DISTINCT ) 
   -- Use GROUP BY rather than COUNT DISTINCT to save on query costs
   -- Avoid using correlated subqueries where possible. Try to use joins or uncorrelated subqueries. 
   -- Avoid IF-ELSE statements with SQL; teradata & some others dont accept it. Use CASE for consistency.
   
-
 x -------------------------------------------- x -------------------------------------------- x
 | Correlated Subquery                          | Left Join / Uncorrelated SubQ                |
 | -------------------------------------------- x -------------------------------------------- |
@@ -259,12 +262,4 @@ x -------------------------------------------- x -------------------------------
 |                                              |   ON s1.article = s2.article                 |
 |                                              |   AND s1.price = s2.price;                   |
 x -------------------------------------------- x -------------------------------------------- x           
-  
-
-
-JOIN (
-  SELECT 
-  FROM shop
-  
-  
   
