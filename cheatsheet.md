@@ -137,5 +137,37 @@ Check the type of a variable using `data.dtype`.
 | float | floating point values | float16, float32, or float64
 | string | String values, text | string, unicode |
 
+-------------------------------------------------------------- 
+# Pandas
 
+### Viewing data
 
+```py
+first_rows = data.head()
+data.head(3) 
+column_names = data.columns
+dimensions = data.shape # (x, y)
+```
+
+### Indexing 
+
+```py
+# DataFrame containing the ROWS 4, 5, 6, 7 returned.
+data.loc[3:6]
+
+# DataFrame containing the ROWS 2, 5, and 10 returned. 
+food_info.loc[ [1,4,9] ]
+
+# DataFrame with LAST 5 ROWS returned.
+num_rows = data.shape[0]
+last_rows = data.loc[num_rows-5:num_rows-1] # zero-index
+```
+Columns
+```py
+# one column
+cats_column = data[cats]
+
+# multiple columns
+zinc_copper = food_info[["Zinc_(mg)", "Copper_(mg)"]]
+
+```
