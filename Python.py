@@ -1,3 +1,7 @@
+
+x = ("Split lines \
+  like this")
+
 # ---------------------------------------------------------------------------- #
 # Sorting Data
 
@@ -53,8 +57,8 @@ drop_na_subset = df.dropna(axis=0, subset = ["age", "sex"], thresh=2)
   LOC = column label
   ILOC = column INDEX 
   """
-1_row_1_col = df.iloc[0,0]
-all_rows_1-3_columns = df.iloc[:,0:3]
+one_row_one_col = df.iloc[0,0]
+all_rows_one-to-three_columns = df.iloc[:,0:3]
 row_index_123_col1 = df.loc[123,"col1"]
 
 # Iterate over list, use column1 to filter, then find MEAN value for column2
@@ -67,43 +71,108 @@ row_index_123_col1 = df.loc[123,"col1"]
       mean_values = df[target]['col2'].mean()
       fares_by_class[levels] = mean_values
       
+# Iterate all levels of column1, then find the MEAN value for each on column2
+
+  unique_ranks = df['col1'].unique()
+  output = dict()
+
+  for ranks in unique_ranks:
+      subset = df[df['col1'] == ranks]
+      total_per_group = subset['col2'].sum()
+      output[ranks] = total_per_group
+
 # Select rows with first name Antonio, # and all columns between 'city' and 'email'
 df.loc[df['first_name'] == 'Antonio', 'city':'email']
- 
+df.loc[df['first_name'] == 'Antonio', [1:4]]
+
 # Select rows where the email column ends with 'hotmail.com', include all columns
 df.loc[df['email'].str.endswith("hotmail.com")]   
  
-# Select rows with first_name equal to some values, search in all columns
+# Select rows with first_name equal to some values, retrieve all columns
 df.loc[df['first_name'].isin(['France', 'Tyisha', 'Eric'])]   
        
 # Select rows with first name Antonio AND has a gmail addresses
 df.loc[df['email'].str.endswith("gmail.com") & (df['first_name'] == 'Antonio')] 
  
-# select rows with id column between 100 and 200, and just return 'postal' and 'web' columns
+# select rows with id column between 100 and 200, and just return 'postal' and 'web' 
 df.loc[(df['id'] > 100) & (df['id'] <= 200), ['postal', 'web']] 
  
 # A lambda function that yields True/False values can also be used.
-# Select rows where the company name has 4 words in it.
-df.loc[df['company_name'].apply(lambda x: len(x.split(' ')) == 4)] 
- 
-# Selections can be achieved outside of the main .loc for clarity:
-  # Form a separate variable with your selections:
-  idx = df['company_name'].apply(lambda x: len(x.split(' ')) == 4)
+  # Method 1
+  # Select rows where the company name has 4 words in it.
+  df.loc[df['company_name'].apply(lambda x: len(x.split(' ')) == 4)] 
+
+  # Method 2
+  # Retrieve all rows with company names with 4 words 
+  subset = df['company_name'].apply(lambda x: len(x.split(' ')) == 4)
   # Select only the True values in 'idx' and only the 3 columns specified:
-  df.loc[idx, ['email', 'first_name', 'company']]
+  df.loc[subset, ['email', 'first_name', 'company']]
 
 # ---------------------------------------------------------------------------- #
 # Pivot table
 
 # As dataframe, include [] brackets
 output = df.pivot_table(index = ["groupby1", "groupby2"], 
-                        values = ["value1", "value2], 
+                        values = ["value1", "value2"], 
                         aggfunc = np.mean)
-       
+
 # As Series object, leave out [] brackets
 output = df.pivot_table(index = "col1", 
                         values = "col2",
                         aggfunc = np.mean)
+
+# Aggregate multiple columns in different ways:
+output = df.groupby('group_by_col').aggregate({'col1':np.sum, 
+                                               'col2':np.mean, 
+          'col3': lambda x: x.value_counts().count}) # count unique, drop NAs
+                                               
+# Flatten pivot table as dataframe
+new_df = pd.DataFrame(old_df.to_records())
+new_df.columns = ['name1', 'name2', 'name3']
+
 # ---------------------------------------------------------------------------- #
 # Reset index 
-titanic_reindexed = new_titanic_survival.reset_index(drop=True)
+
+# Creates new column with old index
+df_reindexed = df.reset_index(drop=True)
+
+# ---------------------------------------------------------------------------- #
+# Functions
+
+# For each level of X (column1), find the mean value of Y (column2)
+  results = {}
+  Types_of_X = df['column1'].unique()
+  for X in Types_of_X:
+      subset = df[df['column1'] == X]
+      avg_Y = subset['column2'].mean()
+      results[X] = avg_Y
+
+# ---------------------------------------------------------------------------- #
+# Graphs
+
+# !pip install ggplot
+from ggplot import *
+
+# Bar Charts
+ggplot(aes(x='factor(variable)', 
+           weight='variable', 
+           fill = 'variable'), 
+       data = df) + \
+            ylim(0.80, 1.0) + \
+     geom_bar() + facet_wrap('variable')
+                                               
+# ---------------------------------------------------------------------------- #
+# random workings                                  
+
+# Convert to df
+flattened = pd.DataFrame(output.to_records())
+flattened.columns
+
+# lowest performing 
+flattened["Low_wage_percent"] = flattened['Low_wage_jobs'] / flattened['Total']
+flattened[flattened["Low_wage_percent"] == flattened["Low_wage_percent"].max()]
+
+# Psychology
+flattened[flattened["Major"] == 'PSYCHOLOGY']
+
+low_wage_jobs = recent_grads['Low_wage_jobs'].sum()
