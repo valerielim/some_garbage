@@ -158,7 +158,35 @@ WHERE REGEXP_LIKE( target, 'pattern')
 	SUM(revenue)/SUM(dates) AS avg_daily_revenue,
 	ROW_NUMBER() OVER (PARTITION BY store ORDER BY avg_daily_revenue DESC ) AS Row_sum_rev,
 	ROW_NUMBER() OVER (PARTITION BY store ORDER BY sum_monthly_revenue DESC ) AS Row_avg_rev
-	FROM database 
+	FROM database;
+
+/////* ROW_NUMBER() */////
+
+-- creates row numbers within each category -- 
+	SELECT 
+	    @within_category_rank := category as Cat_Number,
+	    @row_number:= CASE
+	    WHEN @within_category_rank = category THEN @row_number + 1 ELSE 1
+	    END AS num,    
+	    column2,
+	    column3,
+	    column4
+	FROM
+	    table
+	ORDER BY Cat_Number, category;
+
+-- method 2 : order by CUSTOMER
+-- Note: Wrap this in an outer query to select where row_num = 123 
+			    
+SELECT @row_num := IF(@prev_value = d.Customer, @row_num+1, 1) AS RowNumber
+       ,d.Customer
+       ,d.OrderDate
+       ,d.Amount
+       ,@prev_value := d.Customer -- order by CUSTOMER 
+  FROM data d,
+      (SELECT @row_num := 1) x,
+      (SELECT @prev_value := '') y
+  ORDER BY d.Customer, d.OrderDate DESC
 
 /////* CASE */////
 
