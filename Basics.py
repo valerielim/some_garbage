@@ -192,20 +192,6 @@ all_data = pd.merge(df1, df2, how='left', left_on=['df1_column'], right_on=['df2
 # Group by 
 df.groupby(['index'])
 df.groupby(['index', 'index2'])['values'].mean()
-
-# ---------------------------------------------------------------------------- #
-# Graphs
-
-# !pip install ggplot
-from ggplot import *
-
-# Bar Charts
-ggplot(aes(x='factor(variable)', 
-           weight='variable', 
-           fill = 'variable'), 
-       data = df) + \
-            ylim(0.80, 1.0) + \
-     geom_bar() + facet_wrap('variable')
                                                
 # ---------------------------------------------------------------------------- #
 # MODELS
