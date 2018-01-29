@@ -129,5 +129,26 @@ plt.legend(loc = 'top right')
 plt.show()
     
 # ---------------------------------------------------------------------------- #
+# Simple Bar Plot
 
+import matplotlib.pyplot as plt
+from numpy import arange
+
+# plot for first row of data
+fig, ax = plt.subplots()
+
+# height of bar, y axis
+bar_heights = norm_reviews[['RT_user_norm', 'Metacritic_user_nom', 'IMDB_norm', 
+              'Fandango_Ratingvalue', 'Fandango_Stars']].iloc[0].values
+
+# start of bar
+bar_positions = arange(5) + 0.75
+
+ax.bar(left = bar_positions, 
+       height = bar_heights, 
+       width = 0.5) # default = 0.8
+
+plt.show()
+
+# ---------------------------------------------------------------------------- #
 
