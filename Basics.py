@@ -15,6 +15,23 @@ exchangerate = pd.DataFrame([['THB', 0.0415],
                              ['IDR', 0.000415]], # includes exponents 
                             columns=['currencycode','exchg_value'])
 # ---------------------------------------------------------------------------- #
+# Datetime functions
+
+df['booking_date'] = pd.to_datetime(df['booking_date'])
+
+df['Date'] = df['booking_date'].dt.date
+
+def big_datetime(s):
+    """
+    This is an extremely fast approach to datetime parsing.
+    For large data, the same dates are often repeated. Rather than
+    re-parse these, we store all unique dates, parse them, and
+    use a lookup to convert all dates.
+    """
+    dates = {date:pd.to_datetime(date) for date in s.unique()}
+    return s.apply(lambda v: dates[v])
+
+# ---------------------------------------------------------------------------- #
 # Dictionary
 
 # Can have mixed keys (i.e., string, integer)
@@ -150,11 +167,23 @@ output = df.pivot_table(index = "col1",
                         values = "col2",
                         aggfunc = np.mean)
 
+output = df.pivot_table(index = ["Agent Name", "Date"], 
+                        values = "Driver ID", 
+                        aggfunc = 'count')
+
 # Aggregate multiple columns in different ways:
 output = df.groupby('group_by_col').aggregate({'col1':np.sum, 
                                                'col2':np.mean, 
           'col3': lambda x: x.value_counts().count}) # count unique, drop NAs
-                                               
+
+# Aggregate single column in multiple ways:
+func_lst = [('mean',np.mean), 
+            ('count', 'count'), 
+            ('med',np.median), 
+            ('std',np.std)]
+
+output = df.groupby('category_name')['value_name'].agg(func_lst).stack(level=0).unstack(level=0)
+
 # Flatten pivot table as dataframe
 new_df = pd.DataFrame(old_df.to_records())
 new_df.columns = ['name1', 'name2', 'name3']
@@ -164,6 +193,26 @@ new_df.columns = ['name1', 'name2', 'name3']
 
 # Creates new column with old index
 df_reindexed = df.reset_index(drop=True)
+
+# ---------------------------------------------------------------------------- #
+# Melt categorical labels to numbers
+
+Melts food items to numbers:
+  
+   col1  col2  col3
+0     1     0     0
+1     2     1     1
+2     3     2     0
+3     4     0     1
+4     5     1     1
+
+# Single column
+df['C'] = df['C'].astype('category')
+df['C'] = df['C'].cat.codes
+
+# ALL categorical columns
+cat_columns = df.select_dtypes(['category']).columns
+df[cat_columns] = df[cat_columns].apply(lambda x: x.cat.codes)
 
 # ---------------------------------------------------------------------------- #
 # Functions
@@ -180,6 +229,10 @@ df_reindexed = df.reset_index(drop=True)
 df['final_state'] = 0         # reset all to declined first
 df["final_state"][df['target'].str.contains("APPROVED")] = 1
 
+# Keep only rows that have (n) of each category
+clean = df[df.groupby('category_name').category_name.transform(len) >= 4]
+
+
 # ---------------------------------------------------------------------------- #
 # Join tables
 
@@ -192,7 +245,7 @@ all_data = pd.merge(df1, df2, how='left', left_on=['df1_column'], right_on=['df2
 # Group by 
 df.groupby(['index'])
 df.groupby(['index', 'index2'])['values'].mean()
-                                               
+
 # ---------------------------------------------------------------------------- #
 # MODELS
 
@@ -221,4 +274,39 @@ predictions = model.predict(X) # make the predictions by the model
 # Print out the statistics
 model.summary()
 
+# ---------------------------------------------------------------------------- #
+# GRAPHS
+
+# LINE graph, many colourful lines on single plot
+    import matplotlib as plt
+    fig, ax = plt.subplots()
+    for key, grp in graph.groupby(['Agent Name']):
+        ax = grp.plot(ax=ax, kind='line', x='Date', y='Driver ID', label=key, figsize=(15,5))
+    plt.legend(loc='best')
+    # plt.xticks(rotation=90)   # rotate x-axis labels
+    # ax.set_xlim([24,25])      # set axis limits
+    plt.show()
+
+# BAR graph
+    import matplotlib as plt
+    df.plot(x='Hour', y='total_distance', kind='bar', color='r')
+    plt.show()
+
+# SCATTERPLOT, weighted
+    # data
+    x = clean['total_distance']
+    y = (clean['time_taken']/60)
+    group = clean['driver_name_c']
+    weight = clean['shopping_estimated_price']
+
+    # figure
+    plt.figure(1, figsize = (16, 10))
+    plt.scatter(x=x, y=y, c=group, s=weight/50)
+    # plt.axis([0, 14, 500, 4000])
+
+    # labels
+    plt.title('Distance per Trip Against Time Taken per Trip, weighed by Value of Item of Delivered')
+    plt.xlabel('Total distance of trip (km)')
+    plt.ylabel('Time taken per trip (min)')
+    plt.show()
 
